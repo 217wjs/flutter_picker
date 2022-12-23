@@ -188,11 +188,11 @@ class Picker {
 
   /// show picker bottom sheet
   void showBottomSheet(
-      BuildContext context, {
-        ThemeData? themeData,
-        Color? backgroundColor,
-        PickerWidgetBuilder? builder,
-      }) {
+    BuildContext context, {
+    ThemeData? themeData,
+    Color? backgroundColor,
+    PickerWidgetBuilder? builder,
+  }) {
     Scaffold.of(context).showBottomSheet((BuildContext context) {
       final picker = makePicker(themeData);
       return builder == null ? picker : builder(context, picker);
@@ -204,12 +204,14 @@ class Picker {
       {ThemeData? themeData,
       bool isScrollControlled = false,
       bool useRootNavigator = false,
+      bool isDismissible = true,
       Color? backgroundColor,
       PickerWidgetBuilder? builder}) async {
     return await showModalBottomSheet<T>(
         context: context, //state.context,
         isScrollControlled: isScrollControlled,
         useRootNavigator: useRootNavigator,
+        isDismissible: isDismissible,
         backgroundColor: backgroundColor,
         builder: (BuildContext context) {
           final picker = makePicker(themeData, true);
@@ -620,8 +622,8 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
     return items;
   }
 
-  Widget _buildCupertinoPicker(BuildContext context,
-      int i, int _length, PickerAdapter adapter, Key? key) {
+  Widget _buildCupertinoPicker(BuildContext context, int i, int _length,
+      PickerAdapter adapter, Key? key) {
     return CupertinoPicker.builder(
       key: key,
       backgroundColor: picker.backgroundColor,
