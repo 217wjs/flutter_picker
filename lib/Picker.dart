@@ -200,19 +200,23 @@ class Picker {
   }
 
   /// Display modal picker
-  Future<T?> showModal<T>(BuildContext context,
-      {ThemeData? themeData,
-      bool isScrollControlled = false,
-      bool useRootNavigator = false,
-      bool isDismissible = true,
-      Color? backgroundColor,
-      PickerWidgetBuilder? builder}) async {
+  Future<T?> showModal<T>(
+    BuildContext context, {
+    ThemeData? themeData,
+    bool isScrollControlled = false,
+    bool useRootNavigator = false,
+    bool isDismissible = true,
+    Color? backgroundColor,
+    PickerWidgetBuilder? builder,
+    RoundedRectangleBorder? border,
+  }) async {
     return await showModalBottomSheet<T>(
         context: context, //state.context,
         isScrollControlled: isScrollControlled,
         useRootNavigator: useRootNavigator,
         isDismissible: isDismissible,
         backgroundColor: backgroundColor,
+        shape: border,
         builder: (BuildContext context) {
           final picker = makePicker(themeData, true);
           return builder == null ? picker : builder(context, picker);
