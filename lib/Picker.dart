@@ -160,14 +160,21 @@ class Picker {
   /// 生成picker控件
   ///
   /// Build picker control
-  Widget makePicker([ThemeData? themeData, bool isModal = false, Key? key]) {
+  Widget makePicker(
+      [ThemeData? themeData,
+      bool isModal = false,
+      BorderRadiusGeometry? borderRadius,
+      Key? key]) {
     _maxLevel = adapter.maxLevel;
     adapter.picker = this;
     adapter.initSelects();
     _widget = PickerWidget(
       key: key ?? ValueKey(this),
-      child:
-          _PickerWidget(picker: this, themeData: themeData, isModal: isModal),
+      child: _PickerWidget(
+          picker: this,
+          themeData: themeData,
+          isModal: isModal,
+          borderRadius: borderRadius),
       data: this,
     );
     return _widget!;
@@ -208,17 +215,18 @@ class Picker {
     bool isDismissible = true,
     Color? backgroundColor,
     PickerWidgetBuilder? builder,
-    RoundedRectangleBorder? border,
+    ShapeBorder? shape,
+    BorderRadiusGeometry? borderRadius,
   }) async {
     return await showModalBottomSheet<T>(
-        context: context, //state.context,
+        context: context,
         isScrollControlled: isScrollControlled,
         useRootNavigator: useRootNavigator,
         isDismissible: isDismissible,
         backgroundColor: backgroundColor,
-        shape: border,
+        shape: shape,
         builder: (BuildContext context) {
-          final picker = makePicker(themeData, true);
+          final picker = makePicker(themeData, true, borderRadius);
           return builder == null ? picker : builder(context, picker);
         });
   }
@@ -358,8 +366,13 @@ class _PickerWidget<T> extends StatefulWidget {
   final Picker picker;
   final ThemeData? themeData;
   final bool isModal;
+  final BorderRadiusGeometry? borderRadius;
   _PickerWidget(
-      {Key? key, required this.picker, this.themeData, required this.isModal})
+      {Key? key,
+      required this.picker,
+      this.themeData,
+      required this.isModal,
+      this.borderRadius})
       : super(key: key);
 
   @override
@@ -456,6 +469,14 @@ class PickerWidgetState<T> extends State<_PickerWidget> {
       mainAxisSize: MainAxisSize.min,
       children: _body,
     );
+
+    if (widget.borderRadius != null) {
+      v = ClipRRect(
+        borderRadius: widget.borderRadius,
+        child: v,
+      );
+    }
+
     if (widget.isModal) {
       return GestureDetector(
         onTap: () {},
