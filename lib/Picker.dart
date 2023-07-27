@@ -68,7 +68,9 @@ class Picker {
   final TextStyle? textStyle,
       cancelTextStyle,
       confirmTextStyle,
-      selectedTextStyle;
+      selectedTextStyle,
+      onFocusTextStyle,
+      onFocusSelectedTextStyle;
   final TextAlign textAlign;
   final IconThemeData? selectedIconTheme;
 
@@ -113,6 +115,7 @@ class Picker {
   final Alignment? pickerAlignment;
   final EdgeInsets? contentPadding;
   final bool enabled;
+  bool onFocus;
 
   Picker(
       {required this.adapter,
@@ -130,6 +133,9 @@ class Picker {
       this.pickerAlignment = Alignment.center,
       this.contentPadding,
       this.enabled = true,
+      this.onFocus = false,
+      this.onFocusTextStyle,
+      this.onFocusSelectedTextStyle, 
       this.title,
       this.cancel,
       this.confirm,
@@ -675,6 +681,7 @@ class PickerWidgetState<T> extends State<CustomPickerWidget> {
         },
         onSelectedItemChanged: (int _index) {
           if (_length <= 0) return;
+          picker.onFocus = true;
           var index = _index % _length;
           if (__printDebug) print("onSelectedItemChanged. col: $i, row: $index");
           picker.selecteds[i] = index;
@@ -754,7 +761,9 @@ abstract class PickerAdapter<T> {
       overflow: TextOverflow.ellipsis,
       maxLines: 1,
       textAlign: picker!.textAlign,
-      style: picker!.textStyle ??
+      style: (picker!.onFocus
+        ? picker!.onFocusTextStyle
+        : picker!.textStyle) ??
         TextStyle(
           color: Colors.black87,
           fontFamily: picker?.state?.context != null
@@ -776,7 +785,12 @@ abstract class PickerAdapter<T> {
             child: Text(
               text ?? "",
               textScaleFactor: picker!.textScaleFactor,
-              style: (isSel ? picker!.selectedTextStyle : null)
+              style: (
+                isSel 
+                  ? picker!.onFocus
+                    ? picker!.onFocusSelectedTextStyle 
+                    : picker!.selectedTextStyle 
+                  : null)
             )
           )
       );
