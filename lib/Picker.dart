@@ -484,23 +484,22 @@ class PickerWidgetState<T> extends State<CustomPickerWidget> {
             ),
           ));
 
-    if (picker.footer != null) {
-      if (picker.footerText != null) {
-        _body.add(
-          Text(
-            picker.footerText ?? "",
-            textScaleFactor: picker.textScaleFactor,
-            style: (
-              picker.onFocus
-                ? picker.onFocusSelectedTextStyle 
-                : picker.footerStyle
-            )
+    if (picker.footerText != null) {
+      _body.add(
+        Text(
+          picker.footerText ?? "",
+          textScaleFactor: picker.textScaleFactor,
+          style: (
+            picker.onFocus
+              ? picker.onFocusSelectedTextStyle 
+              : picker.footerStyle
           )
-        );
-      } else {
-        _body.add(picker.footer!);
-      }
+        )
+      );
+    } else if (picker.footer != null) {
+      _body.add(picker.footer!);
     }
+    
     Widget v = Column(
       mainAxisSize: MainAxisSize.min,
       children: _body,
