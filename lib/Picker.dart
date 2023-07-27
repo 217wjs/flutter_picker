@@ -112,6 +112,7 @@ class Picker {
 
   final Alignment? pickerAlignment;
   final EdgeInsets? contentPadding;
+  final bool enabled;
 
   Picker(
       {required this.adapter,
@@ -128,6 +129,7 @@ class Picker {
       this.textScaleFactor,
       this.pickerAlignment = Alignment.center,
       this.contentPadding,
+      this.enabled = true,
       this.title,
       this.cancel,
       this.confirm,
@@ -654,56 +656,59 @@ class PickerWidgetState<T> extends State<CustomPickerWidget> {
 
   Widget _buildCupertinoPicker(BuildContext context, int i, int _length,
       PickerAdapter adapter, Key? key) {
-    return CupertinoPicker.builder(
-      key: key,
-      backgroundColor: picker.backgroundColor,
-      scrollController: scrollController[i],
-      itemExtent: picker.itemExtent,
-      // looping: picker.looping,
-      magnification: picker.magnification,
-      diameterRatio: picker.diameterRatio,
-      squeeze: picker.squeeze,
-      selectionOverlay: picker.selectionOverlay,
-      childCount: picker.looping ? null : _length,
-      itemBuilder: (context, index) {
-        adapter.setColumn(i - 1);
-        return adapter.buildItem(context, index % _length);
-      },
-      onSelectedItemChanged: (int _index) {
-        if (_length <= 0) return;
-        var index = _index % _length;
-        if (__printDebug) print("onSelectedItemChanged. col: $i, row: $index");
-        picker.selecteds[i] = index;
-        updateScrollController(i);
-        adapter.doSelect(i, index);
-        if (picker.changeToFirst) {
-          for (int j = i + 1; j < picker.selecteds.length; j++) {
-            picker.selecteds[j] = 0;
-            scrollController[j].jumpTo(0.0);
-          }
-        }
-        if (picker.onSelect != null)
-          picker.onSelect!(picker, i, picker.selecteds);
-
-        if (adapter.needUpdatePrev(i)) {
-          for (int j = 0; j < picker.selecteds.length; j++) {
-            if (j != i && _keys[j] != null) {
-              adapter.setColumn(j - 1);
-              _keys[j]!(() => null);
-            }
-          }
-          // setState(() {});
-        } else {
-          if (_keys[i] != null) _keys[i]!(() => null);
-          if (adapter.isLinkage) {
+    return AbsorbPointer(
+      absorbing: picker.enabled,
+      child: CupertinoPicker.builder(
+        key: key,
+        backgroundColor: picker.backgroundColor,
+        scrollController: scrollController[i],
+        itemExtent: picker.itemExtent,
+        // looping: picker.looping,
+        magnification: picker.magnification,
+        diameterRatio: picker.diameterRatio,
+        squeeze: picker.squeeze,
+        selectionOverlay: picker.selectionOverlay,
+        childCount: picker.looping ? null : _length,
+        itemBuilder: (context, index) {
+          adapter.setColumn(i - 1);
+          return adapter.buildItem(context, index % _length);
+        },
+        onSelectedItemChanged: (int _index) {
+          if (_length <= 0) return;
+          var index = _index % _length;
+          if (__printDebug) print("onSelectedItemChanged. col: $i, row: $index");
+          picker.selecteds[i] = index;
+          updateScrollController(i);
+          adapter.doSelect(i, index);
+          if (picker.changeToFirst) {
             for (int j = i + 1; j < picker.selecteds.length; j++) {
-              if (j == i) continue;
-              adapter.setColumn(j - 1);
-              _keys[j]?.call(() => null);
+              picker.selecteds[j] = 0;
+              scrollController[j].jumpTo(0.0);
             }
           }
-        }
-      },
+          if (picker.onSelect != null)
+            picker.onSelect!(picker, i, picker.selecteds);
+    
+          if (adapter.needUpdatePrev(i)) {
+            for (int j = 0; j < picker.selecteds.length; j++) {
+              if (j != i && _keys[j] != null) {
+                adapter.setColumn(j - 1);
+                _keys[j]!(() => null);
+              }
+            }
+            // setState(() {});
+          } else {
+            if (_keys[i] != null) _keys[i]!(() => null);
+            if (adapter.isLinkage) {
+              for (int j = i + 1; j < picker.selecteds.length; j++) {
+                if (j == i) continue;
+                adapter.setColumn(j - 1);
+                _keys[j]?.call(() => null);
+              }
+            }
+          }
+        },
+      ),
     );
   }
 
