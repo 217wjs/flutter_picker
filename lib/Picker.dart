@@ -110,8 +110,8 @@ class Picker {
   Widget? _widget;
   PickerWidgetState? _state;
 
-  final bool fixedCenter;
-  final Alignment pickerAlignment;
+  final Alignment? pickerAlignment;
+  final EdgeInsets? contentPadding;
 
   Picker(
       {required this.adapter,
@@ -127,7 +127,7 @@ class Picker {
       this.textAlign = TextAlign.start,
       this.textScaleFactor,
       this.pickerAlignment = Alignment.center,
-      this.fixedCenter = true,
+      this.contentPadding,
       this.title,
       this.cancel,
       this.confirm,
@@ -766,17 +766,15 @@ abstract class PickerAdapter<T> {
                 child: child,
               )
             : child)
-        : Text(text ?? "",
-            textScaleFactor: picker!.textScaleFactor,
-            style: (isSel ? picker!.selectedTextStyle : null)
+        : Container(
+            padding: picker!.contentPadding,
+            child: Text(
+              text ?? "",
+              textScaleFactor: picker!.textScaleFactor,
+              style: (isSel ? picker!.selectedTextStyle : null)
+            )
           )
       );
-                  
-    if (picker!.fixedCenter) {
-      return Center(
-        child: textChild
-      );
-    }
 
     return Container(
       alignment: picker!.pickerAlignment,
