@@ -110,6 +110,9 @@ class Picker {
   Widget? _widget;
   PickerWidgetState? _state;
 
+  final bool fixedCenter;
+  final Alignment pickerAlignment;
+
   Picker(
       {required this.adapter,
       this.delimiter,
@@ -117,19 +120,21 @@ class Picker {
       this.height = 150.0,
       this.itemExtent = 28.0,
       this.columnPadding,
-      this.textStyle,
       this.cancelTextStyle,
       this.confirmTextStyle,
       this.selectedTextStyle,
       this.selectedIconTheme,
       this.textAlign = TextAlign.start,
       this.textScaleFactor,
+      this.pickerAlignment = Alignment.center,
+      this.fixedCenter = true,
       this.title,
       this.cancel,
       this.confirm,
       this.cancelText,
       this.confirmText,
       this.backgroundColor = Colors.white,
+      this.textStyle,
       this.containerColor,
       this.headerColor,
       this.builderHeader,
@@ -170,7 +175,7 @@ class Picker {
     adapter.initSelects();
     _widget = PickerWidget(
       key: key ?? ValueKey(this),
-      child: _PickerWidget(
+      child: CustomPickerWidget(
           picker: this,
           themeData: themeData,
           isModal: isModal,
@@ -362,12 +367,12 @@ class PickerWidget<T> extends InheritedWidget {
   }
 }
 
-class _PickerWidget<T> extends StatefulWidget {
+class CustomPickerWidget<T> extends StatefulWidget {
   final Picker picker;
   final ThemeData? themeData;
   final bool isModal;
   final BorderRadiusGeometry? borderRadius;
-  _PickerWidget(
+  CustomPickerWidget(
       {Key? key,
       required this.picker,
       this.themeData,
@@ -380,7 +385,7 @@ class _PickerWidget<T> extends StatefulWidget {
       PickerWidgetState<T>(picker: this.picker, themeData: this.themeData);
 }
 
-class PickerWidgetState<T> extends State<_PickerWidget> {
+class PickerWidgetState<T> extends State<CustomPickerWidget> {
   final Picker picker;
   final ThemeData? themeData;
   PickerWidgetState({required this.picker, this.themeData});
@@ -740,31 +745,43 @@ abstract class PickerAdapter<T> {
   }
 
   Widget makeText(Widget? child, String? text, bool isSel) {
-    return Center(
-        child: DefaultTextStyle(
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            textAlign: picker!.textAlign,
-            style: picker!.textStyle ??
-                TextStyle(
-                    color: Colors.black87,
-                    fontFamily: picker?.state?.context != null
-                        ? Theme.of(picker!.state!.context)
-                            .textTheme
-                            .headline6!
-                            .fontFamily
-                        : "",
-                    fontSize: Picker.DefaultTextSize),
-            child: child != null
-                ? (isSel && picker!.selectedIconTheme != null
-                    ? IconTheme(
-                        data: picker!.selectedIconTheme!,
-                        child: child,
-                      )
-                    : child)
-                : Text(text ?? "",
-                    textScaleFactor: picker!.textScaleFactor,
-                    style: (isSel ? picker!.selectedTextStyle : null))));
+    Widget textChild = DefaultTextStyle(
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+      textAlign: picker!.textAlign,
+      style: picker!.textStyle ??
+        TextStyle(
+          color: Colors.black87,
+          fontFamily: picker?.state?.context != null
+              ? Theme.of(picker!.state!.context)
+                  .textTheme
+                  .headline6!
+                  .fontFamily
+              : "",
+          fontSize: Picker.DefaultTextSize),
+      child: child != null
+        ? (isSel && picker!.selectedIconTheme != null
+            ? IconTheme(
+                data: picker!.selectedIconTheme!,
+                child: child,
+              )
+            : child)
+        : Text(text ?? "",
+            textScaleFactor: picker!.textScaleFactor,
+            style: (isSel ? picker!.selectedTextStyle : null)
+          )
+      );
+                  
+    if (picker!.fixedCenter) {
+      return Center(
+        child: textChild
+      );
+    }
+
+    return Container(
+      alignment: picker!.pickerAlignment,
+      child: textChild,
+    );
   }
 
   Widget makeTextEx(
