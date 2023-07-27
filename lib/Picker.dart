@@ -657,7 +657,7 @@ class PickerWidgetState<T> extends State<CustomPickerWidget> {
   Widget _buildCupertinoPicker(BuildContext context, int i, int _length,
       PickerAdapter adapter, Key? key) {
     return AbsorbPointer(
-      absorbing: picker.enabled,
+      absorbing: !picker.enabled,
       child: CupertinoPicker.builder(
         key: key,
         backgroundColor: picker.backgroundColor,
