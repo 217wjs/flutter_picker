@@ -69,10 +69,8 @@ class Picker {
       cancelTextStyle,
       confirmTextStyle,
       selectedTextStyle,
-      footerStyle,
       onFocusTextStyle,
-      onFocusSelectedTextStyle,
-      onFocusFooterStyle;
+      onFocusSelectedTextStyle;
   final TextAlign textAlign;
   final IconThemeData? selectedIconTheme;
 
@@ -118,7 +116,6 @@ class Picker {
   final EdgeInsets? contentPadding;
   final bool enabled;
 
-  final String? footerText;
   bool onFocus;
 
   Picker(
@@ -138,9 +135,6 @@ class Picker {
       this.contentPadding,
       this.enabled = true,
       this.onFocus = false,
-      this.footerText,
-      this.footerStyle,
-      this.onFocusFooterStyle,
       this.onFocusTextStyle,
       this.onFocusSelectedTextStyle, 
       this.title,
@@ -484,19 +478,7 @@ class PickerWidgetState<T> extends State<CustomPickerWidget> {
             ),
           ));
 
-    if (picker.footerText != null) {
-      _body.add(
-        Text(
-          picker.footerText ?? "",
-          textScaleFactor: picker.textScaleFactor,
-          style: (
-            picker.onFocus
-              ? picker.onFocusSelectedTextStyle 
-              : picker.footerStyle
-          )
-        )
-      );
-    } else if (picker.footer != null) {
+    if (picker.footer != null) {
       _body.add(picker.footer!);
     }
     
