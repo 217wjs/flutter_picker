@@ -118,6 +118,10 @@ class Picker {
 
   bool onFocus;
 
+  List<FixedExtentScrollController> scrollController = [];
+
+  final Function(List<FixedExtentScrollController>)? getScrollControllers;
+
   Picker(
       {required this.adapter,
       this.delimiter,
@@ -137,6 +141,7 @@ class Picker {
       this.onFocus = false,
       this.onFocusTextStyle,
       this.onFocusSelectedTextStyle, 
+      this.getScrollControllers,
       this.title,
       this.cancel,
       this.confirm,
@@ -415,6 +420,10 @@ class PickerWidgetState<T> extends State<CustomPickerWidget> {
             .add(FixedExtentScrollController(initialItem: picker.selecteds[i]));
         _keys.add(null);
       }
+    }
+    picker.scrollController = scrollController;
+    if (picker.getScrollControllers != null) {
+      picker.getScrollControllers!(picker.scrollController);
     }
   }
 
@@ -765,7 +774,8 @@ abstract class PickerAdapter<T> {
       overflow: TextOverflow.ellipsis,
       maxLines: 1,
       textAlign: picker!.textAlign,
-      style: (picker!.onFocus
+      style: (
+        picker!.onFocus && picker!.enabled
         ? picker!.onFocusTextStyle
         : picker!.textStyle) ??
         TextStyle(
@@ -791,7 +801,7 @@ abstract class PickerAdapter<T> {
               textScaleFactor: picker!.textScaleFactor,
               style: (
                 isSel 
-                  ? picker!.onFocus
+                  ? picker!.onFocus && picker!.enabled
                     ? picker!.onFocusSelectedTextStyle 
                     : picker!.selectedTextStyle 
                   : null)
