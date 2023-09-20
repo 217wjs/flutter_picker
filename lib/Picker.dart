@@ -498,7 +498,7 @@ class PickerWidgetState<T> extends State<CustomPickerWidget> {
 
     if (widget.borderRadius != null) {
       v = ClipRRect(
-        borderRadius: widget.borderRadius,
+        borderRadius: widget.borderRadius ?? BorderRadius.zero,
         child: v,
       );
     }
