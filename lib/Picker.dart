@@ -498,7 +498,7 @@ class PickerWidgetState<T> extends State<CustomPickerWidget> {
 
     if (widget.borderRadius != null) {
       v = ClipRRect(
-        borderRadius: widget.borderRadius,
+        borderRadius: widget.borderRadius ?? BorderRadius.zero,
         child: v,
       );
     }
@@ -706,9 +706,10 @@ class PickerWidgetState<T> extends State<CustomPickerWidget> {
               scrollController[j].jumpTo(0.0);
             }
           }
-          if (picker.onSelect != null)
+          if (picker.onSelect != null) {
             picker.onSelect!(picker, i, picker.selecteds);
-    
+          }
+
           if (adapter.needUpdatePrev(i)) {
             for (int j = 0; j < picker.selecteds.length; j++) {
               if (j != i && _keys[j] != null) {
@@ -775,10 +776,12 @@ abstract class PickerAdapter<T> {
       maxLines: 1,
       textAlign: picker!.textAlign,
       style: (
-        picker!.onFocus && picker!.enabled
-        ? picker!.onFocusTextStyle
-        : picker!.textStyle) ??
-        TextStyle(
+        picker!.enabled
+            ? picker!.onFocus
+                ? picker?.onFocusTextStyle
+                : picker?.textStyle
+            : picker?.textStyle
+        ) ?? picker?.textStyle ?? TextStyle(
           color: Colors.black87,
           fontFamily: picker?.state?.context != null
               ? Theme.of(picker!.state!.context)
@@ -832,17 +835,19 @@ abstract class PickerAdapter<T> {
         _txtSize = picker!.selectedTextStyle!.fontSize;
     }
 
-    return new Center(
-        //alignment: Alignment.center,
-        child: DefaultTextStyle(
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            textAlign: picker!.textAlign,
-            style: picker!.textStyle ??
-                TextStyle(color: _txtColor, fontSize: _txtSize),
-            child: Wrap(
-              children: items,
-            )));
+    return Center(
+      //alignment: Alignment.center,
+      child: DefaultTextStyle(
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        textAlign: picker!.textAlign,
+        style: picker!.textStyle ??
+            TextStyle(color: _txtColor, fontSize: _txtSize),
+        child: Wrap(
+          children: items,
+        )
+      )
+    );
   }
 
   String getText() {
@@ -1206,6 +1211,126 @@ class NumberPickerAdapter extends PickerAdapter<int> {
     for (int i = 0; i < picker!.selecteds.length; i++) {
       int j = picker!.selecteds[i];
       int v = data[i].valueOf(j);
+      _items.add(v);
+    }
+    return _items;
+  }
+}
+
+class StringPickerColumn {
+  final List<String>? items;
+  final String? initValue;
+  final int columnFlex;
+  final int jump;
+  final Widget? postfix, suffix;
+  final PickerValueFormat<String>? onFormatValue;
+
+  const StringPickerColumn({
+    this.items,
+    this.initValue,
+    this.jump = 1,
+    this.columnFlex = 1,
+    this.postfix,
+    this.suffix,
+    this.onFormatValue,
+  });
+
+  int indexOf(String? value) {
+    if (value == null) return -1;
+    if (items != null) return items!.indexOf(value);
+    return -1;
+  }
+
+  String valueOf(int index) {
+    if (items != null) {
+      return items![index];
+    }
+    return "";
+  }
+
+  String getValueText(int index) {
+    return onFormatValue == null
+        ? "${valueOf(index)}"
+        : onFormatValue!(valueOf(index));
+  }
+
+  int count() {
+    return items?.length ?? 0;
+  }
+}
+
+class StringPickerAdapter extends PickerAdapter<String> {
+  StringPickerAdapter({required this.data});
+
+  final List<StringPickerColumn> data;
+  StringPickerColumn? cur;
+  int _col = 0;
+
+  @override
+  int getLength() {
+    if (cur == null) return 0;
+    if (cur!.items != null) return cur!.items!.length;
+    return cur!.count();
+  }
+
+  @override
+  int getMaxLevel() => data.length;
+
+  @override
+  bool getIsLinkage() {
+    return false;
+  }
+
+  @override
+  void setColumn(int index) {
+    if (index != -1 && _col == index + 1) return;
+    _col = index + 1;
+    if (_col >= data.length) {
+      cur = null;
+    } else {
+      cur = data[_col];
+    }
+  }
+
+  @override
+  void initSelects() {
+    int _maxLevel = getMaxLevel();
+    // ignore: unnecessary_null_comparison
+    if (picker!.selecteds == null) picker!.selecteds = <int>[];
+    if (picker!.selecteds.length == 0) {
+      for (int i = 0; i < _maxLevel; i++) {
+        int v = data[i].indexOf(data[i].initValue);
+        if (v < 0) v = 0;
+        picker!.selecteds.add(v);
+      }
+    }
+  }
+
+  @override
+  Widget buildItem(BuildContext context, int index) {
+    final txt = cur!.getValueText(index);
+    final isSel = index == picker!.selecteds[_col];
+    if (picker!.onBuilderItem != null) {
+      final _v = picker!.onBuilderItem!(context, txt, null, isSel, _col, index);
+      if (_v != null) return _v;
+    }
+    if (cur!.postfix == null && cur!.suffix == null)
+      return makeText(null, txt, isSel);
+    else
+      return makeTextEx(null, txt, cur!.postfix, cur!.suffix, isSel);
+  }
+
+  @override
+  int getColumnFlex(int column) {
+    return data[column].columnFlex;
+  }
+
+  @override
+  List<String> getSelectedValues() {
+    List<String> _items = [];
+    for (int i = 0; i < picker!.selecteds.length; i++) {
+      int j = picker!.selecteds[i];
+      String v = data[i].valueOf(j);
       _items.add(v);
     }
     return _items;
